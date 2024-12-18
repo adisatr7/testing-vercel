@@ -5,6 +5,11 @@ import express from 'express'
 const isProduction = process.env.NODE_ENV === 'production'
 const base = process.env.BASE || '/'
 
+// Cached production assets
+let templateHtml = isProduction
+  ? await fs.readFile('./dist/client/index.html', 'utf-8')
+  : ''
+
 // Create http server
 export const app = express()
 
@@ -24,6 +29,9 @@ if (!isProduction) {
   const sirv = (await import('sirv')).default
   app.use(compression())
   app.use(base, sirv('./dist/client', { extensions: [] }))
+
+  // Read the template HTML file in production mode
+  templateHtml = await fs.readFile('./index.html', 'utf-8')
 }
 
 // Serve HTML
